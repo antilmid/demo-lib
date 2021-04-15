@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <button id='btnBigger'>放大</button>
+  <button id='btnSmaller'>缩小</button>
+  <canvas id='canvasDom'></canvas>
+  <script>
+    let currentSize = 1;
+    const data = '22FF770033B2B244FF0022A6';
+    const dataArr = [];
+    (data.match(/../g) || []).map(hex => {
+      const colorInfo = parseInt(hex, 16);
+      dataArr.push(colorInfo, colorInfo, colorInfo, 255);
+    });
+    
+    const ctx = canvasDom.getContext('2d');
+    
+
+    function onBigger () {
+      currentSize += 1;
+      drawImg();
+    }
+
+    function onSmaller() {
+      if(currentSize > 1) currentSize -= 1;
+      drawImg();
+    }
+
+    function drawImg () {
+      canvasDom.width = 6*currentSize;
+      canvasDom.height = 2*currentSize;
+      const imgData = new ImageData(new Uint8ClampedArray(scale(dataArr, currentSize)), 6*currentSize, 2*currentSize);
+      ctx.clearRect(0, 0, canvasDom.width, canvasDom.height);
+      ctx.putImageData(imgData, 0, 0);
+    }
+
+
+    function scale(arr, size = 1, w = 6, h = 2) {
+      const sw = w*size;
+      const sh = h*size;
+      const tmpArr = [];
+      const newArr = [];
+      for(let i = 0; i < sh; i+=1) tmpArr.push([]);
+      for(let i=0; i < arr.length; i+=4) {
+        const pix = [arr[i], arr[i+1], arr[i+2], arr[i+3]];
+        for(let z = 0; z < size; z+=1) {
+          for(let n = 0; n < size; n+=1) {
+            tmpArr[parseInt(i/(w*4))*size+n].push(...pix);
+          }
+        }
+      }
+      tmpArr.map(line => newArr.push(...line))
+      return newArr;
+    }
+
+    drawImg();
+    btnBigger.onclick = onBigger;
+    btnSmaller.onclick = onSmaller;
+  </script>
+</body>
+</html>
