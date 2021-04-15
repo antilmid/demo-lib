@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <button id='btn'>开始</button>
+  <canvas id='canvasDom1'></canvas>
+  <canvas id='canvasDom2'></canvas>
+  <video id='vdo'></video>
+
+  <script>
+    btn.onclick = () => {
+      canvasDom1.height = 640/2;
+      canvasDom1.width =480/2;
+      canvasDom2.height = 640/2;
+      canvasDom2.width = 480/2;
+    const music = new Audio('./ae.mp3');
+    const musicTrack = music.captureStream(24);
+    music.play();
+    const ctx1 = canvasDom1.getContext('2d');
+    const ctx2 = canvasDom2.getContext('2d');
+    const mediaStream1 = canvasDom1.captureStream(24);
+    const mediaStream2 = canvasDom2.captureStream(24);
+    const tracks = mediaStream2.getTracks();
+    mediaStream1.addTrack(tracks[0]);
+    
+    // vdo.srcObject = mediaStream1;
+    // vdo.play();
+    // console.log(URL.createObjectURL(mediaStream))
+    // let blob = null;
+    musicTrack.onaddtrack = (e) => {
+      mediaStream1.addTrack(e.track)
+      const mediaRC = new MediaRecorder(mediaStream1, {videoBitsPerSecond: 8500000});
+      mediaRC.ondataavailable = (e) => { // 接收数据
+        blob = e.data;
+        const url = URL.createObjectURL(blob);
+        console.log(url);
+        vdo.src = url;
+        vdo.play();
+      }
+      mediaRC.start();
+      console.log(e)
+      setTimeout(()=>{
+        mediaRC.stop();
+      }, 10000)
+    }
+    
+    
+
+    function getRandInt (range = 15) {
+      return parseInt(Math.random()*range);
+    }
+
+    ctx1.fillStyle = 'rgba(255,255,255,0)';
+    ctx1.fillRect(0, 0, 640, 480)
+    ctx2.fillStyle = 'rgba(255,255,255,0)';
+    ctx2.fillRect(0, 0, 640, 480)
+    setInterval(()=>{
+      // ctx.clearRect(0, 0, 600, 300);
+      ctx1.fillStyle = '#f00'
+      ctx1.fillRect(getRandInt(640/2), getRandInt(480/2), getRandInt(), getRandInt(), 10);
+      ctx2.fillStyle = '#0f0'
+      ctx2.fillRect(getRandInt(640/2), getRandInt(480/2), getRandInt(), getRandInt(), 10);
+    }, 60)
+
+
+    
+    }
+  </script>
+</body>
+</html>
