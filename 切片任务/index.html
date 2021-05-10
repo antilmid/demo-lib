@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ch">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      class TaskSlice {
+        config = {
+          wait_time: 40,
+          timeout: 12000,
+        }
+        bindFunction = null;
+        constructor (config = {}, bindFunction = null) {
+          this.config = config;
+          this.bindFunction = bindFunction;
+        }
+        run(fn){
+          const gen_fn = fn || this.bindFunction;
+          let gen_res_fn = null;
+          if(typeof gen_fn === "function") gen_res_fn = gen_fn();
+          if(!gen_res_fn || typeof gen_res_fn.next !== 'function') return ;
+          (function slice_task () {
+            const start = performance.now();
+            const res = null;
+            while(performance.now() - start < this.config.wait_time && !res?.done){
+              gen_res_fn.next();
+            }
+            if(res.done) return ;
+            requestAnimationFrame(slice_task);
+          })();
+        }
+      }
+
+
+
+
+
+      function ts(gen) {
+        if (typeof gen === "function") gen = gen();
+        if (!gen || typeof gen.next !== "function") return;
+        (function next() {
+          const start = performance.now();
+          let res = null;
+          do {
+            res = gen.next();
+          } while (!res.done && performance.now() - start < 25);
+          if (res.done) return;
+          setTimeout(next);
+        })();
+      }
+
+      // 用法
+      ts(function* () {
+        const start = performance.now();
+        while (performance.now() - start < 1000) {
+          yield;
+        }
+        console.log("done!");
+      });
+    </script>
+  </body>
+</html>
